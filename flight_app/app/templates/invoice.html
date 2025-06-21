@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+{% load filters %}
+
+<!--
+  Template for invoice/. Shows company and customer information with booking information
+  in a table with printing function. User must be logged in to view this page.
+-->
+
+{% block title %}Invoice {{ booking.ref }}{% endblock %}
+
+{% block head_extra %}
+<style>
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #invoice, #invoice * {
+      visibility: visible;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "partials/navbar.html" with nav_head="Invoice "|add:booking.ref is_customer=1 index_on_logout=1 %}
+
+<div id="invoice" class="container mt-3">
+  <div class="bg-banana-yellow" style="height: 20px;"></div>
+
+  <div class="py-3">
+    <div class="row">
+      <div class="col-md-6">
+        <img src="{% static 'images/logo.png' %}" alt="Logo image" style="width: 70px;">
+        <h2>Banana Air</h2>
+        <p>
+          270/284 Postman Road, Dairy Flat 0794, New Zealand<br>
+          +64 800 494 647<br>
+          info@bananaair.com
+        </p>
+      </div>
+      <div class="col-md-6 text-end mt-5">
+        <h2>INVOICE</h2>
+        <p>
+          Reference: <u>{{ booking.ref }}</u><br>
+          Booking date (GMT): <u>{{ booking.created_at|date:"d/m/Y" }}</u>
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mb-4">
+    <p>
+      <b>BILL TO</b><br>
+      {{ customer.title|capfirst }} {{ customer.fname|capfirst }} {{ customer.lname|capfirst }}<br>
+      {{ customer.email }}
+    </p>
+  </div>
+
+  <table class="table table-striped">
+    <thead class="table-warning">
+      <tr>
+        <th>Aircraft</th>
+        <th>Flight &numero;</th>
+        <th>Departure</th>
+        <th>Destination</th>
+        <th>Departure Date &amp; Time</th>
+        <th>Quantity</th>
+        <th>Ticket Price</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in schedules %}
+        <tr>
+          <td>{{ s.aircraft.brand }} {{ s.aircraft.name }}</td>
+          <td>{{ s.flight_no }}</td>
+          <td>{{ s.dep_icao.region }} - {{ s.dep_icao_id }}</td>
+          <td>{{ s.arr_icao.region }} - {{ s.arr_icao_id }}</td>
+          <td>{{ s.dep_dt_local|local_dt }}</td>
+          <td>{{ booking.tickets }}</td>
+          {% if forloop.counter == 1 %}
+            <td>${{ prices.depart|floatformat:2 }}</td>
+            <td>${{ prices.depart|multiply:booking.tickets|floatformat:2 }}</td>
+          {% else %}
+            <td>${{ prices.return|floatformat:2 }}</td>
+            <td>${{ prices.return|multiply:booking.tickets|floatformat:2 }}</td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="row">
+    <div class="col-6 pt-1">
+      We recommmend you arrive at least 1.5 hours before your flight.<br>
+      Balance due at check-in. Prices shown in NZD.
+    </div>
+    <div class="col-6 text-end pt-3">
+      <b class="alert alert-warning">Balance Due: ${{ prices.total|floatformat:2 }}</b>
+    </div>
+  </div>
+
+  <div class="container-fluid bg-banana-yellow mt-4" style="height: 20px;"></div>
+</div>
+
+<div class="row justify-content-center my-4">
+  <div class="col-auto p-0 me-2">
+    <button onclick="window.print()" class="btn btn-outline-light btn-sm border-black text-black">Print</button>
+  </div>
+  <div class="col-auto p-0">
+    <a href="{% url 'bookings' %}" class="btn btn-outline-light btn-sm border-black text-black">View all bookings</a>
+  </div>
+</div>
+{% endblock %}
+

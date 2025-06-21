@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% load filters %}
+
+<!--
+  Template for flights/. Includes flight_cards.html for outbound and return with message toasts.
+-->
+
+{% block title %}Flights from {{ search.origin.region }} to {{ search.destination.region }}{% endblock %}
+
+{% block content %}
+{% include "partials/navbar.html" with nav_head=search|flights_nav_head is_customer=is_customer my_bookings=1 %}
+
+<div class="container" style="max-width: 930px; margin: 0 auto;">
+  <form method="post" action="{% url 'flights' %}" id="flights-form">
+      <div class="my-2">
+        {% if search.return_date %}<h2 class="pt-3">Outbound</h2>{% endif %}
+        {% include "partials/flight_cards.html" with search=search week_price_avail=week_price_avail.depart results=results.depart form=form %}
+      </div>
+      {% if search.return_date %}
+        <div class="my-2">
+          <h2 class="pt-3">Return</h2>
+          {% include "partials/flight_cards.html" with search=search week_price_avail=week_price_avail.return results=results.return is_return=1 form=form %}
+        </div>
+      {% endif %}
+      <div class="text-center my-4">
+        <button type="submit" id="submitBtn" class="btn btn-dark"
+          {% if not results.depart or search.return_date and not results.return %}disabled{% endif %}>
+          Book selected
+        </button>
+      </div>
+      {% if messages %}
+        {% for m in messages %}
+          {% include "partials/msg_toast.html" with error=1 message=m %}
+        {% endfor %}
+      {% endif %}
+    {% csrf_token %}
+  </form>
+</div>
+
+<script src="{% static 'js/flights.js' %}"></script>
+<script src="{% static 'js/overlays.js' %}"></script>
+{% endblock %}
+

@@ -1,0 +1,50 @@
+{% load filters %}
+
+<!--
+  Template for FlightSearchForm. Includes fields for origin, destination,
+  departure and (optionally) return dates, #travellers. Also includes two
+  inputs not part of the form: a checkbox for toggling the return date
+  field and a button for swapping the origin and destination.
+  Some sites use an isReturn field but I forgo this as the existence of
+  the required return dates can be checked.
+-->
+<form action="{% url 'flights' %}" method="get" id="search-form">
+  <div class="row gx-2 justify-content-center align-items-center">
+    <div id="orig" class="col-12 col-lg-auto">
+      {{ form.origin.label_tag }}
+      {{ form.origin|form_css:"height-45 form-control form-control-sm text-center" }}
+    </div>
+    <button id="swap-btn" type="button" class="btn btn-secondary btn-sm">
+      <i class="bi bi-arrow-left-right"></i>
+    </button>
+    <div id="dest" class="col-12 col-lg-auto">
+      {{ form.destination.label_tag }}
+      {{ form.destination|form_css:"height-45 form-control form-control-sm text-center" }}
+    </div>
+    <div id="depart" class="col-12 col-lg-1">
+      {{ form.depart_date.label_tag }}
+      {{ form.depart_date|form_css:"height-45 form-control form-control-sm text-center" }}
+    </div>
+    <div id="return" class="col-12 col-lg-1">
+      {{ form.return_date.label_tag }}
+      {{ form.return_date|form_css:"height-45 form-control form-control-sm text-center" }}
+    </div>
+    <div id="travellers" class="col-12 col-lg-auto">
+      <!-- Uses a hidden input controlled by two buttons via JS while displaying the current value -->
+      {{ form.travellers.label_tag }}
+      <div class="height-45 pt-2">
+        <button type="button" id="dec-travellers" class="btn btn-secondary"><b>-</b></button>
+        <span id="travellers-display" class="px-1" style="user-select: none;">{{ form.travellers.value }}</span>
+        <button type="button" id="inc-travellers" class="btn btn-secondary"><b>+</b></button>
+        <input type="hidden" name="{{ form.travellers.name }}" id="{{ form.travellers.id_for_label }}" value="{{ form.travellers.value }}"/>
+      </div>
+    </div>
+    <div class="col-12 col-lg-auto ms-2">
+      <button id="search-button" type="submit" class="btn btn-dark">Search</button>
+    </div>
+  </div>
+  <div class="form-check ms-3 mt-2">
+    <input type="checkbox" id="is_return" class="form-check-input"/>
+    <label>Return trip?</label>
+  </div>
+</form>

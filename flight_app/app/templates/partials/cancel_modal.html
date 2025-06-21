@@ -1,0 +1,26 @@
+{% load static %}
+
+<!-- Button to trigger Bootstrap modal -->
+<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancel-modal-{{ ref }}">
+  Cancel booking
+</button>
+
+<!-- Bootstrap modal for CancelForm -->
+<div class="modal fade" id="cancel-modal-{{ ref }}">
+  <div class="modal-dialog" style="max-width: 580px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Are you sure you want to cancel booking {{ ref }}?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <form method="post" action="{% url 'bookings' %}">
+          <input type="hidden" name="ref" value="{{ ref }}">
+          <button type="submit" class="btn btn-dark">Cancel booking</button>
+          {% csrf_token %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+

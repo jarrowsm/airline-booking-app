@@ -1,0 +1,23 @@
+{% load static %}
+
+<!--
+  Dynamic navbar - includes logo, header and, optionally, a login/logout button  
+-->
+<div id="nav" class="bg-white py-3 border-bottom">
+  <div class="container">
+    <div class="row align-items-center px-5 mx-5">
+      <div class="col-auto">
+        <a href="{% url 'index' %}">
+          <img src="{% static 'images/logo.png' %}" alt="Logo image" style="width: 50px;">
+        </a>
+      </div>
+      <h4 class="col-auto mt-2">{{ nav_head|default:"Banana Air" }}</h4>
+      {% if not no_login %}
+        <div class="col-auto ms-auto">
+          {% include "partials/login_logout_modal.html" with is_customer=is_customer index_on_logout=index_on_logout refresh=refresh %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+

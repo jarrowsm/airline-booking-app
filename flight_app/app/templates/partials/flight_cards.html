@@ -1,0 +1,110 @@
+{% load filters %}
+
+
+<!--
+  Cards displayed in flights/. Includes date selection within the week followed
+  by schedule_details.html plus current prices, seats available and select radios
+  for FlightSelectionForm.
+  Used for both outbound and return flight schedules.
+-->
+
+<!-- Date selection -->
+<div class="row row-cols-7 g-1" style="max-width: 935px; margin: 0 auto;">
+  {% for d, p, a in week_price_avail %}
+    <!-- d: current date, p: price (float), a: flights available (bool) -->
+    <div class="col">
+      {% if d|date_before_now %}
+        <!-- Grey out dates before the current date -->
+        <div class="card text-center" style="background-color: #eee; color: #aaa; border: 1px solid #d3d3d3; cursor: not-allowed;">
+          <div class="card-body p-2">
+            <h6 class="card-title">{{ d|date:"D" }}<br>{{ d|date:"j M" }}</h6>
+            <p class="card-text mb-0">&ndash;</p>
+          </div>
+        </div>
+      {% else %}
+        <!-- Each card links to the date and corrects dates for a single request -->
+        {% if is_return %}  <!-- Currently on return flights -->
+          <!-- Also modifies departure date if linked date is earlier -->
+          <a href="{% url 'flights' %}?origin={{ search.origin.icao }}&destination={{ search.destination.icao }}&depart_date={% if search.depart_date|gt:d %}{{ d|date:"Y-m-d" }}{% else %}{{ search.depart_date|date:"Y-m-d" }}{% endif %}&return_date={{ d|date:"Y-m-d" }}&travellers={{ search.travellers }}" class="text-decoration-none">
+        {% else %}
+          <!-- Also modifies return date (if exists) if linked date is later -->
+          <a href="{% url 'flights' %}?origin={{ search.origin.icao }}&destination={{ search.destination.icao }}&depart_date={{ d|date:"Y-m-d" }}{% if search.return_date %}&return_date={% if d|gt:search.return_date %}{{ d|date:"Y-m-d" }}{% else %}{{ search.return_date|date:"Y-m-d" }}{% endif %}{% endif %}&travellers={{ search.travellers }}" class="text-decoration-none">
+        {% endif %}
+          <div class="card text-center" style="border: 1px solid {% if forloop.counter == 4 %}#f4ca35{% else %}#d3d3d3{% endif %};">
+            <div class="card-body p-2">
+              <h6 class="card-title">{{ d|date:"D" }}<br>{{ d|date:"j M" }}</h6>
+              {% if p %}
+                <!-- Show prices with strike if no seats available -->
+                <p class="card-text mb-0">
+                  {% if not a %}<s style="color: #999;">From ${{ p|floatformat:2 }}</s>
+                  {% else %}From ${{ p|floatformat:2 }}
+                  {% endif %}
+                </p>
+              {% else %}
+                <p class="card-text mb-0">&ndash;</p>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Flights -->
+<div class="row row-cols-1 g-3 border rounded-1 mt-2 pt-1 pb-3 bg-white" style="max-width: 935px; margin: 0 auto;">
+  {% if not results %}
+    <div class="text-center mt-5 mb-4"><p>No flights found for this date.</p></div>
+  {% else %}
+    {% for flight in results %}
+      <div class="col">
+        <div class="card border-0">
+          <div class="card-body py-1">
+            <div class="card p-3 border" style="border: 1px solid #555;">
+              <div class="d-flex align-items-center">
+                <!-- Schedule details -->
+                {% include "partials/schedule_details.html" with schedule=flight %}
+
+                <!-- Separator -->
+                <div class="border-end ms-4 me-4" style="height: 80px;"></div>
+
+                <!-- Seats, price, select radio -->
+                <div class="text-center me-2">
+                  <p class="mb-1"><b class="fs-4">${{ flight.current_price|floatformat:2 }}</b> <span style="font-size: 0.7rem;">per ticket</span></p>
+                  <p class="mb-1" style="font-size: 0.9rem;">
+                    <i class="bi-ticket" style="color: #555;"></i>
+                    {{ flight.seats_avail }} seat{% if flight.seats_avail == 1 %}{% else %}s{% endif %} left at this price
+                  </p>
+                  {% if is_return %}
+                    <div id="select-return">
+                      <input type="radio"
+                             class="form-check-input"
+                             name="{{ form.select_return.name }}"
+                             data-seats="{{ flight.seats_avail }}"
+                             value="{{ flight.id }}"
+                             required> 
+                      Select
+                    </div>
+                  {% else %}
+                    <div id="select-depart">
+                      <input type="radio"
+                             class="form-check-input"
+                             name="{{ form.select_depart.name }}"
+                             data-seats="{{ flight.seats_avail }}"
+                             value="{{ flight.id }}"
+                             required>
+                      Select
+                    </div>
+                  {% endif %}
+                  <!-- Not enough seats toast -->
+                  <div class="toast-container position-relative"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+

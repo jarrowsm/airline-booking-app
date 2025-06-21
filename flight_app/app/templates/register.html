@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load filters %}
+{% load static %}
+
+{% block title %}Confirm your details{% endblock %}
+
+<!--
+  Template for register/. User may continue or modify their search (redirect to search/).
+  If logged in, the user may continue as that customer via a link to confirm/ or enter
+  different details which registers a new customer. If not logged in, user may continue
+  as an existing customer (log in) via EmailForm or register via CustomerDetailsForm.
+-->
+
+{% block content %}
+{% with nav_head="Confirm your details" %}
+  {% include "partials/navbar.html" with nav_head=nav_head no_login=1 %}
+{% endwith %}
+
+<div class="container my-3">
+  <div class="row g-3 border rounded-1 pt-1 pb-3 bg-white" style="max-width: 935px; margin: 0 auto;">
+    <div class="row pt-3">
+      <div class="col text-center">
+        <h6 class="d-inline me-2">You will have another chance to review your booking before confirming</h6>
+        <a href="{% url 'register' %}?action=modify" class="btn btn-outline-light btn-sm border-black text-black">
+            Go back
+        </a>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card border-0">
+        <div class="card-body py-1">
+          <div class="card p-3 border">
+            {% if customer %}
+              <h5 class="text-center mt-4">Continue as
+                {{ customer.title|capfirst }}
+                {{ customer.fname|capfirst }}
+                {{ customer.lname|capfirst }}?
+                <a href="{% url 'confirm'%}">
+                  <button class="btn btn-outline-light btn-sm ms-2 border-black text-black ms-1">Click here</button>
+                </a>
+              </h5>
+            {% else %}
+              <h5 class="text-center">Done this before?</h5>
+              <div class="row justify-content-center">
+                <div class="col-md-9">
+                  {% include "partials/login_logout_form.html" with form=email_form %}
+                </div>
+              </div>
+            {% endif %}
+              <div class="d-flex align-items-center my-3 mx-4">
+                <hr class="flex-grow-1 me-3"/>OR<hr class="flex-grow-1 ms-3"/>
+              </div>
+            <div class="row justify-content-center">
+              <div class="col-md-9">
+                <h5 class="text-center">Please enter your details</h5>
+                <form method="post" action="{% url 'register' %}">
+                    {% with form=customer_form %}
+                      <div class="mb-2">
+                        {{ form.title.label_tag }}
+                        {{ form.title|form_css:"form-select" }}
+                      </div>
+                      <div class="mb-2">
+                        {{ form.fname.label_tag }}
+                        {{ form.fname|form_css:"form-control no-pointer" }}
+                      </div>
+                      <div class="mb-2">
+                        {{ form.lname.label_tag }}
+                        {{ form.lname|form_css:"form-control no-pointer" }}
+                      </div>
+                      <div class="mb-2">
+                        {{ form.sex.label_tag }}
+                        <div class="text-center">
+                          <div class="form-check-inline">
+                            <input class="form-check-input" type="radio" name="sex" id="male" value="m"/> Male
+                          </div>
+                          <div class="form-check-inline">
+                            <input class="form-check-input" type="radio" name="sex" id="female" value="f"/> Female
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        {{ form.email.label_tag }}
+                        {{ form.email|form_css:"form-control no-pointer" }}
+                        {{ form.email.errors }}
+                      </div>
+                    {% endwith %}
+                    <div class="text-center mt-3">
+                      <button type="submit" class="btn btn-dark">Continue</button>
+                    </div>
+                  {% csrf_token %}
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,52 @@
+{% load static %}
+
+<!--
+  Bootstrap modal for login and logout. The EmailForm or ConfirmForm
+  is formatted in partials/login_logout_form.html and inserted into
+  login-modal-body. The first container contains the login/logout
+  button and optionally a link button to bookings/ if logged in.
+
+  These actions are performed via AJAX in login-logout.js which also
+  modifies the visual contents to avoid needing to refresh. This
+  script is passed parameters for the current state, refreshing
+  (used in some cases e.g. bookings/) and redirection.
+-->
+<div class="container">
+  <div class="row gx-2 align-items-center">
+    <div id="my-bookings-div" class="col-auto">
+      {% if is_customer and my_bookings %}
+        <a href="{% url 'bookings' %}" id="my-bookings-button" class="btn btn-outline-light btn-sm border-black text-black">
+          My bookings
+        </a>
+      {% endif %}
+    </div>
+    <div class="col-auto">
+      <button id="login-button" class="btn btn-outline-light btn-sm border-black text-black">
+        Log {% if is_customer %}out{% else %}in{% endif %}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="login-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="login-modal-title">
+          {% if is_customer %}Are you sure you want to log out?
+          {% else %}Enter your email from a previous booking
+          {% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="login-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+{{ is_customer|json_script:"isCustomer" }}
+{{ index_on_logout|json_script:"indexOnLogout" }}
+{{ refresh|json_script:"refresh" }}
+{{ my_bookings|json_script:"myBookings" }}
+<script src="{% static 'js/login-logout.js' %}"></script>
+

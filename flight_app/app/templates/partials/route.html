@@ -1,0 +1,12 @@
+{% load static %}
+{% load filters %}
+
+<!-- Template to display route images, controlled by route.js -->
+<div class="my-3 text-center">
+  {% with path=dest_icao|route_img_path:orig_icao %}
+    <div id="route-for-{{ ref }}" class="route-div">
+      <img src="{% static path %}" class="rounded route-img" alt="Route map"/>
+    </div>
+  {% endwith %}
+</div>
+

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load filters %}
+{% load static %}
+
+{% block title %}Your bookings{% endblock %}
+
+<!--
+  Template for bookings/. Displays each booking with schedule_details.html plus
+  whether the flight is outbound or return and the departure date.
+  Above this is the reference number, trip type and traveller count across from
+  buttons for the route map, link to the full invoice, and cancel booking modal.
+  If the customer is not logged in, a message is displayed, otherwise the customer
+  details and and number of bookings are shown. 
+-->
+{% block content %}
+{% include "partials/navbar.html" with is_customer=is_customer refresh=1 nav_head="Your bookings" %}
+
+{% if book_ref %}
+  {% include "partials/msg_toast.html" with message="Thank you for your booking! Ref. "|add:book_ref %}
+{% elif cancel_ref %}
+  {% include "partials/msg_toast.html" with message="Successfully cancelled booking "|add:cancel_ref %}
+{% endif %}
+
+<div class="container my-2">
+  <div class="row text-center row-cols-1 border rounded-1 py-3 bg-white" style="max-width: 935px; margin: 0 auto;">
+    <div class="row">
+      <div class="col">
+        <h6 class="d-inline">
+          {% if customer %}
+            {% with n=bookings|length c=customer %}
+              <b>{{ c.title|capfirst }} {{ c.fname|capfirst }} {{ c.lname|capfirst }}</b> &ndash; <b>{{ c.email }}</b>
+              has {% if n == 0 %}no{% else %}{{ n }}{% endif %} booking{% if not n == 1 %}s{% endif %}
+            {% endwith %}
+          {% else %}Log in to view your bookings
+          {% endif %}
+        </h6>
+      </div>
+    </div>
+  </div>
+
+  {% if bookings %}
+  {% for b in bookings %}
+  <div class="row row-cols-1 g-3 border rounded-1 my-2 pb-3 bg-white" style="max-width: 935px; margin: 0 auto;">
+    <div class="col">
+      <div class="card border-0">
+        <div class="card-body pb-0">
+          <h5 class="card-title row align-items-center">
+            <div class="col-auto">
+              Ref. {{ b.ref }}
+              &middot;
+              {% if b.return_schedule %}Round-trip{% else %}One-way{% endif %}
+              &middot;
+              <i class="bi bi-person me-1"></i>{{ b.tickets }}
+            </div>
+            <div class="col-auto ms-auto">
+              <button class="routeBtn btn btn-outline-light btn-sm border-black text-black" data-ref="{{ b.ref }}">Show route</button>
+              <a href="{% url 'invoice' %}?ref={{ b.ref }}" class="btn btn-outline-light btn-sm border-black text-black mx-1">View invoice</a>
+              {% include "partials/cancel_modal.html" with ref=b.ref %}
+            </div>
+          </h5>
+
+          {% include "partials/route.html" with ref=b.ref orig_icao=b.depart_schedule.dep_icao_id dest_icao=b.depart_schedule.arr_icao_id %}
+
+          <!-- Schedule details -->
+          <div class="card p-3 border">
+            <div>
+              <p class="my-1">Outbound &ndash; {{ b.depart_schedule.dep_dt_local|local_d }}</p>
+              {% include "partials/schedule_details.html" with schedule=b.depart_schedule %}
+            </div>
+            {% if b.return_schedule %}
+            <div class="mt-2">
+              <p class="my-1">Return &ndash; {{ b.return_schedule.dep_dt_local|local_d }}</p>
+              {% include "partials/schedule_details.html" with schedule=b.return_schedule %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+<script src="{% static 'js/route.js' %}"></script>
+<script src="{% static 'js/overlays.js' %}"></script>
+{% endblock %}
+

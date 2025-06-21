@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+{% load filters %}
+
+{% block title %}Confirm your booking{% endblock %}
+
+<!--
+  Template for confirm/. Shows customer details with modify link.
+  Includes schedule_details.html with route map, change flights link,
+  and flight type (one-way or round-trip).
+-->
+
+{% block content %}
+{% with nav_head="Confirm your booking" %}
+  {% include "partials/navbar.html" with no_login=1 %}
+{% endwith %}
+
+<div class="container my-3">
+  <div class="border rounded-1 mt-2 pt-1 pb-3 bg-white" style="max-width: 935px; margin: 0 auto;">
+    <div class="pt-3">
+      <div class="col text-center">
+        <h6 class="d-inline me-2">
+          Confirm booking for
+          <b>{{ customer.title|capfirst }} {{ customer.fname|capfirst }} {{ customer.lname|capfirst }}</b> &ndash; <b>{{ customer.email }}</b>
+        </h6>
+        <a href="{% url 'register' %}" class="btn btn-outline-light btn-sm border-black text-black">Modify</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mb-3">
+  <div class="row g-2 border rounded-1 pt-1 pb-3 bg-white" style="max-width: 935px; margin: 0 auto;">
+    <div class="pt-3 text-center">
+      <div>
+        <button class="routeBtn btn btn-outline-light btn-sm border-black text-black me-1" data-ref="1">Show route</button>
+        <a href="{% url 'register' %}?action=modify" class="btn btn-outline-light btn-sm border-black text-black">Change flights</a>
+      </div>
+      {% include "partials/route.html" with orig_icao=schedules.0.dep_icao_id dest_icao=schedules.0.arr_icao_id ref=1 %}
+    </div>
+    <h5 class="card-title ms-3 mt-0"><b>{% if booking.return_id %}Round-trip{% else %}One-way{% endif %}</b></h5>
+    {% for flight in schedules %}
+      <div class="card border-0">
+        <div class="card-body py-0">
+          <h5 class="card-title mt-3 mb-2">
+            {% if forloop.counter == 1 %}Outbound &ndash; {{ flight.dep_dt_local|local_d }}
+            {% else %}Return &ndash; {{ flight.dep_dt_local|local_d }}
+            {% endif %}
+          </h5>
+          <div class="border rounded-1 p-3">
+            <div class="d-flex align-items-center">
+              {% include "partials/schedule_details.html" with schedule=flight %}
+
+              <div class="border-end mx-4" style="height: 80px;"></div>
+
+              <!-- Ticket and price info -->
+              <div class="me-2">
+                <p class="my-1 fs-4"><b>
+                  {{ booking.tickets }} &times;
+                  {% if forloop.counter == 1 %}
+                    ${{ booking.prices.depart|floatformat:2 }}
+                  {% else %}
+                    ${{ booking.prices.return|floatformat:2 }}
+                  {% endif %}
+                </b></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+    <h3 class="text-center mt-3 mb-2"><b>
+      Total ${{ booking.prices.total|floatformat:2 }}<span class="ms-1" style="font-size: 0.92rem;">NZD</span>
+    </b></h3>
+
+    <div class="text-center mb-1">
+      <form method="post" action="{% url 'confirm' %}">
+        <button type="submit" class="btn btn-dark">Book</button>
+        {% csrf_token %}
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/route.js' %}"></script>
+<script src="{% static 'js/overlays.js' %}"></script>
+{% endblock %}
+

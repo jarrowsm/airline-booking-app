@@ -1,0 +1,43 @@
+{% load filters %}
+
+<!--
+  This partial template for flight information is used in search/, 
+  confirm/ and bookings/. It features the local origin and destination
+  region and ICAO codes, and departure and arrival times in local timezones,
+  serperated by an expanding horizontal line and plane icon (inspired by
+  Skyscanner) surrounded by the duration and flight number. The (?) icon
+  triggers a Bootstrap popover displaying the flight number and aircraft model.
+-->
+<div class="d-flex flex-grow-1 px-1">
+  <!-- Origin -->
+  <div class="d-flex flex-column justify-content-center">
+    <div><b>{{ schedule.dep_dt_local|local_t }}</b></div>
+    <div>{{ schedule.dep_icao.region }} ({{ schedule.dep_icao_id }})</div>
+  </div>
+
+  <!-- Duration and flight info -->
+  <div class="flex-grow-1 text-center text-secondary small px-3">
+    <div>
+      {{ schedule.duration|format_duration }}
+    </div>
+    <div class="d-flex align-items-center gap-1">
+      <hr class="flex-grow-1 border border-2 border-secondary"/>
+      <i class="bi bi-airplane-fill" style="transform: rotate(90deg);"></i>
+    </div>
+    <div>
+      {{ schedule.flight_no }}
+      <i class="bi bi-question-circle flight-info-popover" style="cursor: pointer;"
+         data-bs-toggle="popover" data-bs-placement="bottom" data-bs-html="true"
+         data-bs-content='{% if schedule.aircraft.name == 'SJ30i' %}<span class="text-banana-yellow">Banana Air Prestige</span><br>{% endif %}
+                          Flight &numero;: {{ schedule.flight_no }}<br>
+                          Aircraft: {{ schedule.aircraft.brand }} {{ schedule.aircraft.name }}'></i>
+    </div>
+  </div>
+
+  <!-- Destination -->
+  <div class="d-flex flex-column justify-content-center text-end">
+    <div><b>{{ schedule.arr_dt_local|local_t }} {{ schedule.next_day_tag }}</b></div>
+    <div>{{ schedule.arr_icao.region }} ({{ schedule.arr_icao_id }})</div>
+  </div>
+</div>
+

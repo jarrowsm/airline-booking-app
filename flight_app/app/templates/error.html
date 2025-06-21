@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+<!-- Template for displaying error lists -->
+{% block content %}
+<div class="container mt-5 pt-5">
+  <div class="row justify-content-center">
+    <div class="col-auto text-center">
+      <a href="{% url 'index' %}">
+        <img src="{% static 'images/logo.png' %}" alt="Logo image" style="width: 100px;">
+      </a>
+      <h2 class="text-danger mb-4">{{ h2 }}</h2>
+      {% if errors %}
+        <ul class="list-group mb-4">
+          {% for error in errors %}
+            <li class="list-group-item list-group-item-danger">{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% with view=link|default:"index" text=link_text|default:"Go home" %}
+        <a href="{% url view %}" class="btn btn-dark">{{ text }}</a>
+      {% endwith %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

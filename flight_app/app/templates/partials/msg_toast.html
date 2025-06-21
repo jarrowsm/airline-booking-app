@@ -1,0 +1,7 @@
+<!-- Template for success and error toasts -->
+<div class="position-fixed translate-middle top-0 start-50 " style="z-index: 9999; width: 300px;">
+  <div class="{% if error %}bg-danger{% else %}bg-success{% endif %} msg-toast toast text-white text-center" data-bs-delay="6000">
+      <div class="toast-body">{{ message }}</div>
+  </div>
+</div>
+

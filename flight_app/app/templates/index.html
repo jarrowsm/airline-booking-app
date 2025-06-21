@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+{% load filters %}
+
+<!--
+  Template for the landing page. Includes hero banner with login and search_form.html
+  and resume booking CTA if a flight is selected. Beneath this is a featured destinations
+  section with banners which modify the search destination when clicked.
+-->
+
+{% block content %}
+
+<div class="bg-banana-yellow py-5">
+  <div class="container" style="max-width: 900px">
+    <div class="row align-items-center gx-2">
+      <div class="col-auto">
+        <img src="{% static 'images/logo.png' %}" alt="Logo image" style="width: 50px;">
+      </div>
+      <div class="col-auto">
+        <h5 class="ms-1 mb-0">Banana Air</h5>
+      </div>
+      <div class="col-auto ms-auto">
+        {% include "partials/login_logout_modal.html" with my_bookings=1 is_customer=is_customer%}
+      </div>
+    </div>
+    <h2 class="my-5">Explore flights in New Zealand and Australia.</h1>
+    {% include "partials/search_form.html" with form=form %}
+  </div>
+  
+  {% if depart_schedule %}
+  {% with s=depart_schedule %}
+    <div id="continue-div" class="mt-4 text-center">
+      Hurry, only {{ s.seats_avail }} seat{% if s.seats_avail > 1 %}s{% endif %} left to {{ s.arr_icao.region }}!
+      <a href="{% url customer|yesno:'confirm,register' %}">
+        <button id="continue-btn" class="btn btn-outline-light btn-sm ms-2 border-black text-black">Continue</button>
+      </a>
+    </div>
+  {% endwith %}
+  {% endif %}
+</div>
+
+<div class="container my-2 pt-5">
+  <h2>Featured destinations</h2>
+  <div id="melbourne-banner" class="banner position-relative my-4" style="cursor: pointer;">
+    <img src="{% static 'images/melbourne-banner.webp' %}" alt="Melbourne banner image" class="rounded w-100">
+    <div class="position-absolute ps-5 text-white" style="top: 50%;">
+      <h3 class="fs-1"><b>Fly Prestige to Melbourne</b></h3>
+      <p class="fs-3">Travel as a VIP with Banana Air Prestige</p>
+    </div>
+  </div>
+  <div id="rotorua-banner" class="position-relative my-4" style="cursor: pointer;">
+    <img src="{% static 'images/rotorua-banner.webp' %}" alt="Rotorua banner image" class="rounded w-100">
+    <div class="position-absolute ps-5 text-white" style="top: 50%;">
+      <h3 class="fs-1"><b>Discover Rotorua</b></h3>
+      <p class="fs-3">Frequent shuttles to geothermal wonders</p>
+    </div>
+  </div>
+</div>
+
+{{ info|json_script:"airports" }}
+<script src="{% static 'js/index.js' %}"></script>
+{% endblock %}
+
